@@ -16,7 +16,7 @@ jobs:
     - name: Check if response.json exists
       id: check_file
       run: |
-        if [ -f "response.json" ]; then
+        if [ -f "${GITHUB_WORKSPACE}/response.json" ]; then
           echo "::set-output name=file_exists::true"
         else
           echo "::set-output name=file_exists::false"
@@ -27,16 +27,17 @@ jobs:
         curl -sS -o temp.csv https://www.vpngate.net/api/iphone/
         tail -n +2 temp.csv > temp_without_header.csv
         python process_csv.py
-        mv processed_response.json response.json
+        mv processed_response.json "${GITHUB_WORKSPACE}/response.json"
         
     - name: Create response.json if it doesn't exist
       if: steps.check_file.outputs.file_exists == 'false'
       run: |
-        echo '{}' > response.json
+        echo '{}' > "${GITHUB_WORKSPACE}/response.json"
     
     - name: Commit and Push Changes
       if: github.event_name != 'workflow_dispatch'  # Skip commit and push for manual trigger
       run: |
+        cd ${GITHUB_WORKSPACE}
         git config --global user.name "GitHub Actions"
         git config --global user.email "actions@github.com"
         git add response.json
