@@ -13,6 +13,15 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v2
       
+    - name: Check if response.json exists
+      id: check_file
+      run: |
+        if [ -f "response.json" ]; then
+          echo "::set-output name=file_exists::true"
+        else
+          echo "::set-output name=file_exists::false"
+        fi
+    
     - name: Call API and Process Response
       run: |
         curl -sS -o temp.csv https://www.vpngate.net/api/iphone/
@@ -20,6 +29,11 @@ jobs:
         python process_csv.py
         mv processed_response.json response.json
         
+    - name: Create response.json if it doesn't exist
+      if: steps.check_file.outputs.file_exists == 'false'
+      run: |
+        echo '{}' > response.json
+    
     - name: Commit and Push Changes
       if: github.event_name != 'workflow_dispatch'  # Skip commit and push for manual trigger
       run: |
