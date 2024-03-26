@@ -24,6 +24,9 @@ jobs:
         # Convert CSV to JSON
         python process_csv.py
         
+        # Rename the processed JSON file
+        mv processed_response.json temp_response.json
+        
         # Replace response.json with temp file
         mv temp_response.json "${GITHUB_WORKSPACE}/response.json"
         
